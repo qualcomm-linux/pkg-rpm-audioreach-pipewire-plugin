@@ -2,95 +2,71 @@
 Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 SPDX-License-Identifier: BSD-3-Clause
 -->
-# Package branch — CentOS 10 Stream (`c10s`)
+# pkg-rpm-audioreach-pipewire-plugin
 
-**This is the branch you work on.** It holds your package's spec file and
-`sources` pointer, plus the CI workflows that build and publish them.
+RPM packaging for
+[audioreach-pipewire-plugin](https://github.com/Audioreach/audioreach-pipewire-plugin)
+on CentOS Stream 10 (aarch64).
 
-Following the Fedora/CentOS **dist-git** convention, each distro stream gets its
-own branch, and the packaging files live at the branch root:
+audioreach-pipewire-plugin provides a PipeWire module
+(`libpipewire-module-pal`) that integrates AudioReach PAL devices with the
+PipeWire audio server, enabling audio routing and processing through AudioReach
+DSP pipelines on Qualcomm platforms. The package is maintained on the CentOS
+Stream 10 (`c10s`) branch and uses the shared GitHub Actions build and release
+workflow.
 
-| Branch | Stream | Contents |
+## CI Workflows
+
+| Workflow | Trigger | Purpose |
 |---|---|---|
-| `main` | — | Template docs, onboarding guide, community files. Nothing is built here. |
-| **`c10s`** | CentOS 10 Stream | **This branch.** Your spec + `sources` + workflows. |
+| [`build-on-pr.yml`](.github/workflows/build-on-pr.yml) | Pull request | Build the RPM(s) so reviewers confirm the package still builds. Read-only — never publishes. |
+| [`pkg-release.yml`](.github/workflows/pkg-release.yml) | Manual (`workflow_dispatch`) | Build **and** publish the RPM(s) to Artifactory, behind an approval gate. |
 
-Full onboarding guide, configuration reference, and troubleshooting live on
-[`main`](../../tree/main) — see its `README.md` and `docs/workflows.md`.
-
----
-
-## Layout
-
-```
-mypackage.spec.example   # rename to <your-component>.spec
-sources.example          # rename to sources
-.github/workflows/       # build-on-pr.yml, pkg-release.yml
-```
-
-The two starter files carry a `.example` suffix on purpose. The build expects
-**exactly one** `*.spec` at the root, so the suffix keeps the skeleton invisible
-to CI until you rename it — otherwise a fresh repo's first PR would fail with
-`Multiple spec files`.
+The GitHub Actions workflows use the shared
+[`qcom-rpm-utils`](https://github.com/qualcomm-linux/qcom-rpm-utils) build
+environment and run `rpmbuild` inside the prebuilt `rpm-builder` container
+image for the runner's host architecture.
 
 ---
 
-## Getting started
+## Repository Layout
 
-### 1. Rename the starter files
+The `c10s` branch contains the RPM packaging files:
 
-```bash
-git mv mypackage.spec.example <your-component>.spec
-git mv sources.example sources
-```
+| File | Purpose |
+|---|---|
+| `audioreach-pipewire-plugin.spec` | Builds the PipeWire PAL module. |
+| `sources` | SHA-512 checksum for the upstream source archive. |
+| `README.md` | Package and repository documentation. |
+| `LICENSE.txt` | License for the RPM packaging repository. |
 
-### 2. Edit the spec
-
-Set `Name:`, `Version:`, `Summary:`, `License:`, the build/install sections, and
-`%files`. `Source0:` must be a real, fetchable URL whose **filename matches the
-`sources` entry**:
-
-```
-Source0: https://github.com/<org>/<proj>/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
-```
-
-### 3. Record the tarball checksum
-
-**The tarball is never committed to git.** Only its checksum is:
-
-```bash
-sha512sum --tag <your-component>-1.0.tar.gz > sources
-```
-
-which yields a line like:
-
-```
-SHA512 (mycomponent-1.0.tar.gz) = 3a7bd3e2360a3d29eea436fcfb7e44c735d117c...
-```
-
-### 4. Open a PR against this branch
-
-`build-on-pr` fetches the tarball (from the lookaside cache, or from the spec's
-`Source` URL on a cache miss), verifies the checksum, and builds the RPM(s).
-Download them from the run's **Artifacts**.
-
-
-### 5. Release
-
-**Actions → Release → Run workflow**, selecting this branch. A reviewer approves
-the `pkg-release-approval` gate, then the RPM(s) publish to Artifactory.
+The source archive is not committed to this repository. The spec file's
+`Source0` points to the upstream release, and the checksum in `sources` is
+verified before the RPM is built.
 
 ---
 
-## Updating the version
+## Packages
 
-Two edits, every time:
+- `audioreach-pipewire-plugin`: PipeWire module (`libpipewire-module-pal`) that
+  integrates AudioReach PAL devices with the PipeWire audio server. Requires
+  `pipewire` and `wireplumber` at runtime.
+
+---
+
+## Updating the package version
+
+This is the everyday workflow — **two edits on `c10s`, no tarball in git**:
 
 1. Bump `Version:` in the spec (and the `Source0:` URL if its path changed).
-2. Recompute the checksum:
+2. Recompute the checksum for the new tarball:
    ```bash
-   sha512sum --tag <your-component>-<newversion>.tar.gz > sources
+   sha512sum --tag audioreach-pipewire-plugin-<newversion>.tar.gz > sources
    ```
+3. Commit the spec + `sources`, open a PR (build verifies it), merge, then run
+   **Release**. The first release fetches the new upstream tarball, verifies it,
+   and caches it back to Artifactory automatically.
 
-Commit both, open a PR, merge, then run **Release**. The first release fetches
-the new upstream tarball, verifies it, and caches it back automatically.
+## License
+
+This project is licensed under the BSD 3-Clause License. See [LICENSE.txt](LICENSE.txt) for the complete license text.
