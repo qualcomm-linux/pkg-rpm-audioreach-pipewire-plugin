@@ -1,0 +1,39 @@
+From 3736e1800275702b021894fc5a319f72850f7e15 Mon Sep 17 00:00:00 2001
+From: Chiluka Rohith <rchiluka@qti.qualcomm.com>
+Date: Fri, 25 Sep 2026 18:00:00 +0530
+Subject: [PATCH] build: install pipewire module into $(libdir) not hardcoded
+ /usr/lib
+
+The install-exec-hook hardcodes $(DESTDIR)/usr/lib/pipewire-0.3 as the
+destination for libpipewire-module-pal.so. On multilib systems such as
+aarch64, 64-bit libraries live in /usr/lib64 ($(libdir)), so the module
+is installed to the wrong directory: PipeWire looks under
+/usr/lib64/pipewire-0.3 and never finds it, and the RPM build fails with
+an unpackaged-file error.
+
+Use the autoconf-provided $(libdir) so the module lands in the correct
+architecture-specific location on all platforms.
+
+Signed-off-by: Chiluka Rohith <rchiluka@qti.qualcomm.com>
+---
+ Makefile.am | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index a8a98b5..0bfd138 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -11,8 +11,8 @@ libpipewire_module_pal_la_LDFLAGS   = -shared -avoid-version
+ libpipewire_module_pal_la_LIBADD   = -ltinyalsa -ldl -lexpat -lpal -lagm
+ 
+ install-exec-hook:
+-	mkdir -p $(DESTDIR)/usr/lib/pipewire-0.3
+-	$(INSTALL_PROGRAM) .libs/libpipewire-module-pal.so $(DESTDIR)/usr/lib/pipewire-0.3/
++	mkdir -p $(DESTDIR)$(libdir)/pipewire-0.3
++	$(INSTALL_PROGRAM) .libs/libpipewire-module-pal.so $(DESTDIR)$(libdir)/pipewire-0.3/
+ 	rm -f $(DESTDIR)/usr/lib/libpipewire-module-pal.so
+ 
+ install-data-hook:
+-- 
+2.34.1
+
