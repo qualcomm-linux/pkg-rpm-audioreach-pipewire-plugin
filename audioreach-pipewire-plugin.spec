@@ -3,11 +3,12 @@
 
 Name:           audioreach-pipewire-plugin
 Version:        1.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PipeWire plugin for AudioReach audio framework
 License:        BSD-3-Clause
 URL:            https://github.com/Audioreach/audioreach-pipewire-plugin
 Source0:        %{url}/archive/refs/tags/%{vertag}.tar.gz#/%{name}-%{version}.tar.gz
+Patch0:         0001-build-use-libdir-for-pipewire-module-path.patch
 
 ExclusiveArch:  aarch64
 
@@ -34,9 +35,7 @@ routing and processing through AudioReach DSP pipelines on Qualcomm
 platforms.
 
 %prep
-%setup -n %{name}-1.0.0-AU84
-# Fix hardcoded /usr/lib path — on aarch64 modules go to %%{_libdir}
-sed -i 's|$(DESTDIR)/usr/lib/pipewire|$(DESTDIR)$(libdir)/pipewire|g' Makefile.am
+%autosetup -n %{name}-1.0.0-AU84 -p1
 
 %build
 autoreconf -fi
@@ -60,5 +59,12 @@ rm -f %{buildroot}%{_libdir}/libpipewire-module-pal.so
 %{_datadir}/wireplumber/scripts/90-device-detection.lua
 
 %changelog
+* Fri Sep 25 2026 Chiluka Rohith <rchiluka@qti.qualcomm.com> - 1.0.0-2
+- Replace the inline %%prep sed that rewrote the hardcoded /usr/lib
+  pipewire module path with a proper patch (Patch0) so the fix is
+  reviewable and can be submitted upstream
+- The module install path now uses $(libdir), placing it in
+  /usr/lib64/pipewire-0.3 on aarch64
+
 * Wed Aug 19 2026 Qualcomm Linux <quic_linux@quicinc.com> - 1.0.0-1
 - Initial RPM packaging of audioreach-pipewire-plugin version 1.0.0
