@@ -1,8 +1,9 @@
 %global debug_package %{nil}
-%global vertag v1.0.0-AU84
+%global vertag     v1.0.0-AU84
+%global vertag_dir 1.0.0-AU84
 
 Name:           audioreach-pipewire-plugin
-Version:        1.0.0
+Version:        1.0.0~AU84
 Release:        2%{?dist}
 Summary:        PipeWire plugin for AudioReach audio framework
 License:        BSD-3-Clause
@@ -35,7 +36,7 @@ routing and processing through AudioReach DSP pipelines on Qualcomm
 platforms.
 
 %prep
-%autosetup -n %{name}-1.0.0-AU84 -p1
+%autosetup -n %{name}-%{vertag_dir} -p1
 
 %build
 autoreconf -fi
@@ -59,7 +60,7 @@ rm -f %{buildroot}%{_libdir}/libpipewire-module-pal.so
 %{_datadir}/wireplumber/scripts/90-device-detection.lua
 
 %changelog
-* Fri Sep 25 2026 Chiluka Rohith <rchiluka@qti.qualcomm.com> - 1.0.0-2
+* Fri Sep 25 2026 Chiluka Rohith <rchiluka@qti.qualcomm.com> - 1.0.0~AU84-2
 - Replace the inline %%prep sed that rewrote the hardcoded /usr/lib
   pipewire module path with a proper patch (Patch0) so the fix is
   reviewable and can be submitted upstream
