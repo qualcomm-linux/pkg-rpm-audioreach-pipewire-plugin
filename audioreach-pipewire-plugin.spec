@@ -1,10 +1,10 @@
 %global debug_package %{nil}
-%global vertag     v1.0.0-AU84
-%global vertag_dir 1.0.0-AU84
+%global vertag     v1.0.3
+%global vertag_dir 1.0.3
 
 Name:           audioreach-pipewire-plugin
-Version:        1.0.0~AU84
-Release:        2%{?dist}
+Version:        1.0.3
+Release:        1%{?dist}
 Summary:        PipeWire plugin for AudioReach audio framework
 License:        BSD-3-Clause
 URL:            https://github.com/Audioreach/audioreach-pipewire-plugin
@@ -25,6 +25,7 @@ BuildRequires:  pkgconfig(agm)
 BuildRequires:  pkgconfig(libpipewire-0.3)
 BuildRequires:  pkgconfig(pal-headers)
 BuildRequires:  pkgconfig(tinyalsa)
+BuildRequires:  pkgconfig(vui-intf-header)
 
 Requires:       pipewire
 Requires:       wireplumber
@@ -55,11 +56,17 @@ rm -f %{buildroot}%{_libdir}/libpipewire-module-pal.so
 %license LICENSE
 %{_libdir}/pipewire-0.3/libpipewire-module-pal.so
 %{_datadir}/pipewire/pipewire.conf.d/pw-pal-plugin.conf
+%{_datadir}/pipewire/pipewire-pulse.conf.d/pal-compress-offload-sink.conf
 %{_datadir}/wireplumber/wireplumber.conf.d/60-disable-alsa.conf
 %{_datadir}/wireplumber/wireplumber.conf.d/90-device-detection.conf
 %{_datadir}/wireplumber/scripts/90-device-detection.lua
 
 %changelog
+* Tue Oct 27 2026 Febin Francis <ffrancis@qti.qualcomm.com> - 1.0.3-1
+- Update to 1.0.3
+- Add SVA voice-UI and MP3 compress offload support
+- Fix capture silence and muted concurrent playback
+
 * Fri Sep 25 2026 Chiluka Rohith <rchiluka@qti.qualcomm.com> - 1.0.0~AU84-2
 - Replace the inline %%prep sed that rewrote the hardcoded /usr/lib
   pipewire module path with a proper patch (Patch0) so the fix is
